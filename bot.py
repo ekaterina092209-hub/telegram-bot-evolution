@@ -320,7 +320,25 @@ def handle_other_messages(message):
     )
 
 
-# Запуск бота
+# Запуск бота через polling + Flask веб-сервер для Render
 if __name__ == '__main__':
-    print("Бот запущен!")
-    bot.infinity_polling()
+    import threading
+    from flask import Flask
+    import os
+
+    app = Flask(__name__)
+
+    @app.route('/')
+    def index():
+        return "Bot is running"
+
+    # Запускаем бота в отдельном потоке
+    def run_bot():
+        print("Бот запущен!")
+        bot.infinity_polling()
+
+    threading.Thread(target=run_bot).start()
+
+    # Запускаем веб-сервер на том порту, который выдаёт Render
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
